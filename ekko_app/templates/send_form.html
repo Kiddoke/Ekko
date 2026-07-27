@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, intitial-scale=1.0">
+    <title>Ekko</title>
+</head>
+<body>
+
+    <h1>IT-HJELP SMS-TJENESTE (WIP)</h1>
+
+    <form method="post">
+        {% csrf_token %}
+        <div>
+            <h3>Mottakere</h3>
+                <label>
+                    <input type="checkbox" id="toggle-all" onclick="toggleAll()">
+                    Velg/fjern alle
+                </label>
+                <br>
+                <br>
+                {{ form.recipients }}
+        </div>
+
+        <div>
+            <h3>Melding</h3>
+            {{ form.message }}
+            <p id="charCounter">0 / 640 tegn (0 SMS-deler)</p>
+
+            {% if form.errors %}
+            <div style="color: red;">
+                {{ form.errors }}
+            </div>
+        {% endif %}
+        </div>
+        <button type="submit">Send SMS</button>
+    </form>
+
+
+
+    <form method="post" action="{% url 'sync_employees' %}">
+        {% csrf_token %}
+        <button type="submit">Oppdater ansattliste</button>
+
+    </form>
+    {% if messages %}
+    {% for message in messages %}
+        <div>{{ message }}</div>
+    {% endfor %}
+    {% endif %}
+
+
+</body>
+
+<script>
+function updateCharCounter() {
+    const text = document.getElementById("id_message").value;
+    const charCount = text.length;
+    const partsCount = Math.ceil(charCount / 160) || 0;
+
+    document.getElementById("charCounter").textContent =
+        `${charCount} / 640 tegn (${partsCount} SMS-deler)`;
+
+}
+
+function toggleAll() {
+    const toggleBox = document.getElementById("toggle-all");
+    const checkboxes = document.querySelectorAll('input[name="recipients"]');
+
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = toggleBox.checked;
+    });
+
+}
+
+</script>
+
+</html>

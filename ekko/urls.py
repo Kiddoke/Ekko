@@ -20,5 +20,6 @@ from ekko_app import views #ENDRE SENERE
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path("", views.index, name="index"),
+    path('', views.index, name="index"),
+    path('sync_employees/', views.ansatt_sync_view, name="sync_employees"),
 ]
