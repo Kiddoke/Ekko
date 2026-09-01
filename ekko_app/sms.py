@@ -20,7 +20,8 @@ def send_sms(phone_number, message):
         "m" : message
     }
 
-    response = httpx.post(url, data=data)
+    headers = {"Content-Type": "application/x-www-form-urlencoded; charset=utf-8"}
+    response = httpx.post(url, data=data, headers=headers)
     parsed = response.text.split("¤")
 
     if len(parsed) == 1:
@@ -30,6 +31,7 @@ def send_sms(phone_number, message):
             "error" : parsed[0]
         }
 
+
     return {
         "id" : parsed[0],
         "status" : parsed[1],
@@ -38,6 +40,5 @@ def send_sms(phone_number, message):
         "message" : parsed[6],
         "success" : True
     }
-
 
 

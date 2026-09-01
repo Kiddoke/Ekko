@@ -3,29 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, intitial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
     <title>Ekko</title>
 </head>
 <body>
 
-    <h1>IT-HJELP SMS-TJENESTE (WIP)</h1>
+    <h1><b>IT-HJELP SMS-TJENESTE (WIP) VELDIG VELDIG WORK IN PROGRESS</b> </h1>
 
     <form method="post">
         {% csrf_token %}
-        <div>
-            <h3>Mottakere</h3>
-                <label>
-                    <input type="checkbox" id="toggle-all" onclick="toggleAll()">
-                    Velg/fjern alle
-                </label>
-                <br>
-                <br>
-                {{ form.recipients }}
+
+        <br>
+        <h2>Mottakere</h2>
+        
+        <div style="padding: 8px">
+        <label>
+            <input type="checkbox" id="toggle-all" onclick="toggleAll()">
+                Velg/fjern alle
+        </label>
+
+        <label>
+            <input type="checkbox" id="toggle-it-hjelp" onclick="toggleIT_Hjelp()">
+                IT-Hjelp
+        </label>
+
+        <label>
+            <input type="checkbox" id="toggle-vaktleder" onclick="toggleVaktleder()">
+                Vaktledere/Fagansvarlig
+        </label>
+
         </div>
+
+        <div id="recipient-list" class="grid grid-cols-2 gap-2 md:grid-cols-3">
+            {% for ansatt in form.recipients.field.queryset %}
+                <label class="flex items-center gap-2 p-2 border rounded-lg">
+                    <input type="checkbox" name="recipients" value="{{ ansatt.id }}"
+                        data-it-hjelp="{{ ansatt.is_it_hjelp|yesno:'true,false' }}"
+                        data-vaktleder="{{ ansatt.is_vaktleder|yesno:'true,false' }}">
+                    <span class="text-sm text-gray-700">{{ ansatt.username }}</span>
+                </label>
+            {% endfor %}
+        </div>
+        
 
         <div>
             <h3>Melding</h3>
             {{ form.message }}
-            <p id="charCounter">0 / 640 tegn (0 SMS-deler)</p>
+            <p id="charCounter">0 / 610 tegn (0 SMS-deler)</p>
 
             {% if form.errors %}
             <div style="color: red;">
@@ -33,16 +57,24 @@
             </div>
         {% endif %}
         </div>
-        <button type="submit">Send SMS</button>
+        <div class="flex-container">
+            <button type="submit" style="color: red; border: 1px solid black">Send SMS</button>
+            <div>
+                <form method="post" action="{% url 'sync_employees' %}">
+                    {% csrf_token %}
+                    <button type="submit" style="color: red; border: 1px solid black">
+                        Oppdater ansattliste
+                    </button>
+
+                </form>
+            </div>
+
+
+        </div>
+
     </form>
 
 
-
-    <form method="post" action="{% url 'sync_employees' %}">
-        {% csrf_token %}
-        <button type="submit">Oppdater ansattliste</button>
-
-    </form>
     {% if messages %}
     {% for message in messages %}
         <div>{{ message }}</div>
@@ -59,7 +91,7 @@ function updateCharCounter() {
     const partsCount = Math.ceil(charCount / 160) || 0;
 
     document.getElementById("charCounter").textContent =
-        `${charCount} / 640 tegn (${partsCount} SMS-deler)`;
+        `${charCount} / 610 tegn (${partsCount} SMS-deler)`;
 
 }
 
@@ -68,9 +100,32 @@ function toggleAll() {
     const checkboxes = document.querySelectorAll('input[name="recipients"]');
 
     checkboxes.forEach(checkbox => {
-        checkbox.checked = toggleBox.checked;
+        if (checkbox.dataset.itHjelp === "true" || checkbox.dataset.vaktleder === "true") {
+            checkbox.checked = toggleBox.checked;
+        }
     });
+}
 
+function toggleIT_Hjelp() {
+    const toggleBox = document.getElementById("toggle-it-hjelp");
+    const checkboxes = document.querySelectorAll('input[name="recipients"]');
+
+    checkboxes.forEach(checkbox => {
+        if (checkbox.dataset.itHjelp === "true" && checkbox.dataset.vaktleder === "false") {
+            checkbox.checked = toggleBox.checked;
+        }
+    });
+}
+
+function toggleVaktleder() {
+    const toggleBox = document.getElementById("toggle-vaktleder");
+    const checkboxes = document.querySelectorAll('input[name="recipients"]');
+
+    checkboxes.forEach(checkbox => {
+        if (checkbox.dataset.vaktleder === "true") {
+            checkbox.checked = toggleBox.checked;
+        }
+    });
 }
 
 </script>
